@@ -55,7 +55,7 @@ metadata-check: requirements .metadata-check
 .PHONY: .copy-pack-to-subdirectory
 .copy-pack-to-subdirectory:
 	mkdir -p /tmp/packs/$(PACK_NAME)
-	cd $(PACK_DIR);	find . -name 'ci' -prune -or -name '.git' -or -exec cp --parents '{}' '/tmp/packs/$(PACK_NAME)' ';'
+	cd $(PACK_DIR);	find . -name 'ci' -prune -or -name '.git' -or -type f -exec cp --parents '{}' '/tmp/packs/$(PACK_NAME)' ';'
 
 .PHONY: .clean-pack
 .clean-pack:
