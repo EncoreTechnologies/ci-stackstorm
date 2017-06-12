@@ -78,7 +78,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
-		flake8 --config $(CI_DIR)/lint-configs/python/.flake8 $$py || exit 1; \
+		time flake8 --config $(CI_DIR)/lint-configs/python/.flake8 $$py || exit 1; \
 	done
 
 
@@ -88,7 +88,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== pylint ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-  REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(CI_DIR)/lint-configs/ st2-check-pylint-pack $(PACK_DIR) || exit 1;
+	time REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(CI_DIR)/lint-configs/ st2-check-pylint-pack $(PACK_DIR) || exit 1;
 
 
 .PHONY: .configs-check
@@ -98,17 +98,17 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for yaml in $(YAML_FILES); do \
-		st2-check-validate-yaml-file $$yaml || exit 1; \
+		time st2-check-validate-yaml-file $$yaml || exit 1; \
 	done
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for json in $(JSON_FILES); do \
-		st2-check-validate-json-file $$json || exit 1; \
+		time st2-check-validate-json-file $$json || exit 1; \
 	done
 	@echo
 	@echo "==================== example config check ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	st2-check-validate-pack-example-config /tmp/packs/$(PACK_NAME) || exit 1;
+	time st2-check-validate-pack-example-config /tmp/packs/$(PACK_NAME) || exit 1;
 
 .PHONY: .metadata-check
 .metadata-check:
@@ -116,7 +116,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== metadata-check ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-  st2-check-validate-pack-metadata-exists $(PACK_DIR) || exit 1;
+	time st2-check-validate-pack-metadata-exists $(PACK_DIR) || exit 1;
 
 .PHONY: .install-mongodb
 .install-monogodb:
@@ -175,7 +175,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== packs-resource-register ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
+	time ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
 
 
 .PHONY: .packs-tests
@@ -184,7 +184,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== packs-tests ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
+	time $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
 
 .PHONY: .packs-missing-tests
 .packs-missing-tests:
@@ -192,7 +192,7 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== pack-missing-tests ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	st2-check-print-pack-tests-coverage $(PACK_DIR) || exit 1;
+	time st2-check-print-pack-tests-coverage $(PACK_DIR) || exit 1;
 
 .PHONY: .clone-st2-repo
 .clone-st2-repo:
@@ -200,10 +200,10 @@ packs-tests: requirements .clone-st2-repo .packs-tests
 	@echo "==================== cloning st2 repo ===================="
 	@echo
 	if [ ! -d "$(ST2_REPO_PATH)" ]; then \
-		git clone https://github.com/StackStorm/st2.git --depth 1 --single-branch --branch $(ST2_REPO_BRANCH) $(ST2_REPO_PATH); \
+		time git clone https://github.com/StackStorm/st2.git --depth 1 --single-branch --branch $(ST2_REPO_BRANCH) $(ST2_REPO_PATH); \
 	else \
 		pushd $(ST2_REPO_PATH); \
-		git pull; \
+		time git pull; \
 		popd; \
 	fi;
 
@@ -218,9 +218,9 @@ requirements: virtualenv
 	@echo "==================== requirements ===================="
 	@echo
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(VIRTUALENV_DIR)/bin/pip install --upgrade pip; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
+	time $(VIRTUALENV_DIR)/bin/pip install --upgrade pip; \
+	time $(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
+	time $(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
 
 .PHONY: virtualenv
 virtualenv: $(VIRTUALENV_DIR)/bin/activate
