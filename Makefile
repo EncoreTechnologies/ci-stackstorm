@@ -75,6 +75,9 @@ packs-missing-tests: requirements .packs-missing-tests
 .PHONY: packs-tests
 packs-tests: requirements .clone-st2-repo .packs-tests
 
+.PHONY: test
+test: packs-tests
+
 .PHONY: .flake8
 .flake8:
 	@echo
