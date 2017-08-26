@@ -13,6 +13,7 @@ YAML_FILES := $(shell git ls-files '*.yaml' '*.yml')
 JSON_FILES := $(shell git ls-files '*.json')
 PY_FILES   := $(shell git ls-files '*.py')
 VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
+ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= /tmp/st2
 ST2_REPO_BRANCH ?= master
 
@@ -49,6 +50,11 @@ configs-check: requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-
 
 .PHONY: metadata-check
 metadata-check: requirements .metadata-check
+
+# list all makefile targets
+.PHONY: list
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
 # Task which copies pack to temporary sub-directory so we can use old-style check scripts which
 # # require pack to be in a sub-directory
@@ -230,6 +236,13 @@ test: packs-tests
 		git pull; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
+  # if [ ! -d "$(ST2_VIRTUALENV_DIR)" ]; then
+  # 	. $(VIRTUALENV_DIR)/bin/activate; 
+  #   virtualenv --system-site-packages $(ST2_VIRTUALENV_DIR); 
+  # fi; \
+  # . $(ST2_VIRTUALENV_DIR)/bin/activate; \
+  # $(ST2_VIRTUALENV_DIR)/bin/pip install --upgrade pip; \
+  # $(ST2_VIRTUALENV_DIR)/bin/pip install --cache-dir ${HOME}/.pip-cache -q -r ${ST2_REPO_PATH}/requirements.txt
 
 .PHONY: .clean-st2-repo
 .clean-st2-repo:
