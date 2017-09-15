@@ -237,7 +237,7 @@ test: packs-tests
 		git pull; \
 	fi;
 	if [ "$(VENV_USE_SYSTEM_PACKAGES)" -eq "true" ]; then \
-		@echo "==================== installing st2 requirements ===================="
+		echo "==================== installing st2 requirements ===================="; \
 		pip install --cache-dir ${HOME}/.pip-cache -q -r ${ST2_REPO_PATH}/requirements.txt; \
 		pip install --cache-dir ${HOME}/.pip-cache -q -r ${ST2_REPO_PATH}/test-requirements.txt; \
 	fi;
