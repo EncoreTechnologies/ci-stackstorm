@@ -16,7 +16,7 @@ VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= /tmp/st2
 ST2_REPO_BRANCH ?= master
-VENV_USE_SYSTEM_PACKAGES ?= false
+VENV_USE_SYSTEM_PACKAGES ?= "0"
 
 PACK_NAME ?= Caller_needs_to_set_variable_PACK_NAME
 
@@ -236,7 +236,7 @@ test: packs-tests
 		cd $(ST2_REPO_PATH); \
 		git pull; \
 	fi;
-	if [ "$(VENV_USE_SYSTEM_PACKAGES)" -eq "true" ]; then \
+	if [ "$(VENV_USE_SYSTEM_PACKAGES)" -eq "0" ]; then \
 		echo "==================== installing st2 requirements ===================="; \
 		pip install --cache-dir ${HOME}/.pip-cache -q -r ${ST2_REPO_PATH}/requirements.txt; \
 		pip install --cache-dir ${HOME}/.pip-cache -q -r ${ST2_REPO_PATH}/test-requirements.txt; \
@@ -271,7 +271,7 @@ $(VIRTUALENV_DIR)/bin/activate:
 	@echo "==================== virtualenv ===================="
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
-	if [ "$(VENV_USE_SYSTEM_PACKAGES)" -eq "true" ]; then \
+	if [ "$(VENV_USE_SYSTEM_PACKAGES)" -ne "0" ]; then \
 		test -d $(VIRTUALENV_DIR) || virtualenv	--system-site-packages $(VIRTUALENV_DIR); \
 	else \
 		test -d $(VIRTUALENV_DIR) || virtualenv --no-site-packages $(VIRTUALENV_DIR); \
