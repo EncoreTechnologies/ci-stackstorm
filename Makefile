@@ -12,6 +12,7 @@ CI_DIR ?= $(ROOT_DIR)
 YAML_FILES := $(shell git ls-files '*.yaml' '*.yml')
 JSON_FILES := $(shell git ls-files '*.json')
 PY_FILES   := $(shell git ls-files '*.py')
+ROOT_VIRTUALENV ?= ""
 VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= /tmp/st2
@@ -253,7 +254,7 @@ requirements: virtualenv
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(VIRTUALENV_DIR)/bin/pip install --upgrade pip; \
+	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade pip; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
 	@echo "End Time = `date --iso-8601=ns`"
@@ -265,7 +266,13 @@ $(VIRTUALENV_DIR)/bin/activate:
 	@echo "==================== virtualenv ===================="
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
-	test -d $(VIRTUALENV_DIR) || virtualenv --no-site-packages $(VIRTUALENV_DIR);
+	if [ ! -d "$(VIRTUALENV_DIR)" ]; then \
+		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
+			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
+		else \
+			virtualenv --no-site-packages $(VIRTUALENV_DIR);\
+		fi; \
+	fi;
 	@echo "End Time = `date --iso-8601=ns`"
 
 
