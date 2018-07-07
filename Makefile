@@ -17,6 +17,7 @@ VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= /tmp/st2
 ST2_REPO_BRANCH ?= master
+LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
 PACK_NAME ?= Caller_needs_to_set_variable_PACK_NAME
 
@@ -93,7 +94,7 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
-		flake8 --config $(CI_DIR)/lint-configs/python/.flake8 $$py || exit 1; \
+		flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
 	done
 	@echo "End Time = `date --iso-8601=ns`"
 
@@ -105,7 +106,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(CI_DIR)/lint-configs/ st2-check-pylint-pack $(PACK_DIR) || exit 1;
+	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) st2-check-pylint-pack $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 
