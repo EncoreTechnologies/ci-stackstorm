@@ -71,7 +71,7 @@ list:
 	@echo "==================== cleaning packs ===================="
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
-	rm -rf /tmp/packs
+	rm -rf /tmp/packs/${PACK_DIR}
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: packs-resource-register
