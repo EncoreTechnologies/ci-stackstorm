@@ -15,7 +15,7 @@ PY_FILES   := $(shell git ls-files '*.py')
 ROOT_VIRTUALENV ?= ""
 VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
-ST2_REPO_PATH ?= /tmp/st2
+ST2_REPO_PATH ?= $(CI_DIR)/st2
 ST2_REPO_BRANCH ?= master
 LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
@@ -106,7 +106,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) st2-check-pylint-pack $(PACK_DIR) || exit 1;
+	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 
@@ -130,7 +130,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	st2-check-validate-pack-example-config /tmp/packs/$(PACK_NAME) || exit 1;
+	ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-validate-pack-example-config /tmp/packs/$(PACK_NAME) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .metadata-check
@@ -140,7 +140,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	st2-check-validate-pack-metadata-exists $(PACK_DIR) || exit 1;
+	ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-validate-pack-metadata-exists $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .install-mongodb
@@ -201,7 +201,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
+	ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 
@@ -212,7 +212,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
+	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .packs-missing-tests
