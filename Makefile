@@ -231,10 +231,13 @@ test: packs-tests
 	@echo "==================== cloning st2 repo ===================="
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
+	if [ -d "/tmp/st2" ]; then \
+		cp -r "/tmp/st2" "$(ST2_REPO_PATH)"; \
+	fi; \
 	if [ ! -d "$(ST2_REPO_PATH)" ]; then \
 		git clone https://github.com/StackStorm/st2.git --depth 1 --single-branch --branch $(ST2_REPO_BRANCH) $(ST2_REPO_PATH); \
 	else \
-		cd $(ST2_REPO_PATH); \
+		cd "$(ST2_REPO_PATH)"; \
 		git pull; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
