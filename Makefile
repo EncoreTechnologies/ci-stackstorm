@@ -17,6 +17,7 @@ VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
 ST2_REPO_BRANCH ?= master
+LINT_CONFIGS_BRANCH ?= master
 LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
 PACK_NAME ?= Caller_needs_to_set_variable_PACK_NAME
@@ -39,13 +40,13 @@ pack-name:
 clean: .clean-st2-repo .clean-virtualenv .clean-pack
 
 .PHONY: lint
-lint: requirements flake8 pylint configs-check metadata-check
+lint: requirements .clone-st2-lint-repo flake8 pylint configs-check metadata-check
 
 .PHONY: flake8
-flake8: requirements .flake8
+flake8: requirements .clone-st2-lint-repo .flake8
 
 .PHONY: pylint
-pylint: requirements .clone-st2-repo .pylint
+pylint: requirements .clone-st2-repo .clone-st2-lint-repo .pylint
 
 .PHONY: configs-check
 configs-check: requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-check
@@ -107,6 +108,29 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
+	@echo "End Time = `date --iso-8601=ns`"
+
+.PHONY: .clone-st2-lint-repo
+.clone-st2-lint-repo:
+	@echo
+	@echo "==================== cloning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	if [ ! -d "$(LINT_CONFIGS_DIR)" ]; then \
+		git clone https://github.com/StackStorm/lint-configs.git --depth 1 --single-branch --branch $(LINT_CONFIGS_BRANCH) $(LINT_CONFIGS_DIR); \
+	else \
+		cd "$(LINT_CONFIGS_DIR)"; \
+		git pull; \
+	fi;
+	@echo "End Time = `date --iso-8601=ns`"
+
+.PHONY: .clean-st2-lint-repo
+.clean-st2-lint-repo:
+	@echo
+	@echo "==================== cleaning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	rm -rf $(LINT_CONFIGS_DIR)
 	@echo "End Time = `date --iso-8601=ns`"
 
 
