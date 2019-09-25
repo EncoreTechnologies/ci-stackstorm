@@ -112,6 +112,7 @@ test: packs-tests
 	done
 	@echo "End Time = `date --iso-8601=ns`"
 
+
 .PHONY: .pylint
 .pylint:
 	@echo
@@ -122,28 +123,29 @@ test: packs-tests
 	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
+
 .PHONY: .clone-st2-lint-repo
 .clone-st2-lint-repo:
-  @echo
-  @echo "==================== cloning st2 lint repo ===================="
-  @echo
-  @echo "Start Time = `date --iso-8601=ns`"
-  if [ ! -d "$(LINT_CONFIGS_DIR)" ]; then \
-    git clone https://github.com/StackStorm/lint-configs.git --depth 1 --single-branch --branch $(LINT_CONFIGS_BRANCH) $(LINT_CONFIGS_DIR); \
-  else \
-    cd "$(LINT_CONFIGS_DIR)"; \
-    git pull; \
-  fi;
-  @echo "End Time = `date --iso-8601=ns`"
+	@echo
+	@echo "==================== cloning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	if [ ! -d "$(LINT_CONFIGS_DIR)" ]; then \
+		git clone https://github.com/StackStorm/lint-configs.git --depth 1 --single-branch --branch $(LINT_CONFIGS_BRANCH) $(LINT_CONFIGS_DIR); \
+	else \
+		cd "$(LINT_CONFIGS_DIR)"; \
+		git pull; \
+	fi;
+	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .clean-st2-lint-repo
 .clean-st2-lint-repo:
-  @echo
-  @echo "==================== cleaning st2 lint repo ===================="
-  @echo
-  @echo "Start Time = `date --iso-8601=ns`"
-  rm -rf $(LINT_CONFIGS_DIR)
-  @echo "End Time = `date --iso-8601=ns`"
+	@echo
+	@echo "==================== cleaning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	rm -rf $(LINT_CONFIGS_DIR)
+	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .configs-check
 .configs-check:
