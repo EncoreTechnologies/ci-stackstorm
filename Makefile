@@ -37,7 +37,7 @@ pack-name:
 	@echo $(PACK_NAME)
 
 .PHONY: clean
-clean: .clean-st2-repo .clean-virtualenv .clean-pack
+clean: .clean-st2-repo .clean-st2-lint-repo .clean-virtualenv .clean-pack
 
 .PHONY: lint
 lint: requirements .clone-st2-lint-repo flake8 pylint configs-check metadata-check
@@ -95,7 +95,7 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
-		flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
+		flake8 --config $(LINT_CONFIGS_DIR)python/.flake8 $$py || exit 1; \
 	done
 	@echo "End Time = `date --iso-8601=ns`"
 
