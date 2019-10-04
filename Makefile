@@ -315,7 +315,7 @@ virtualenv:
 				$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
 			else \
 				virtualenv --python=$(PYTHON_EXE) --no-site-packages $(VIRTUALENV_DIR);\
-			fi;
+			fi; \
 		fi; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
