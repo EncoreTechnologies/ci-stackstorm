@@ -311,7 +311,7 @@ virtualenv:
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
 		else \
-			ifeq ($(PYTHON_EXE),"python3"); then \
+			if [ "$(PYTHON_EXE)" = "python3" ]; then \
 				$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
 			else \
 				virtualenv --python=$(PYTHON_EXE) --no-site-packages $(VIRTUALENV_DIR);\
