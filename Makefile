@@ -13,10 +13,19 @@ YAML_FILES := $(shell git ls-files '*.yaml' '*.yml')
 JSON_FILES := $(shell git ls-files '*.json')
 PY_FILES   := $(shell git ls-files '*.py')
 ROOT_VIRTUALENV ?= ""
-VIRTUALENV_DIR ?= $(ROOT_DIR)/virtualenv
+
+### python 2/3 specific stuff
+PYTHON_EXE ?= python
+PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
+PYTHON_NAME = python$(PYTHON_VERSION)
+PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
+VIRTUALENV_NAME ?= virtualenv
+VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
+
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
 ST2_REPO_BRANCH ?= master
+LINT_CONFIGS_BRANCH ?= master
 LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
 PACK_NAME ?= Caller_needs_to_set_variable_PACK_NAME
@@ -29,29 +38,35 @@ COMPONENTS := $(wildcard /tmp/st2/st2*)
 .PHONY: all
 # don't register right now (requires us to install stackstorm)
 #all: requirements lint packs-resource-register packs-tests
-all: requirements lint packs-tests
+all: virtualenv requirements lint packs-tests
+
+.PHONY: python2
+python2: .python2 .pythonvars all
+
+.PHONY: python3
+python3: .python3 .pythonvars all
 
 .PHONY: pack-name
 pack-name:
 	@echo $(PACK_NAME)
 
 .PHONY: clean
-clean: .clean-st2-repo .clean-virtualenv .clean-pack
+clean: .clean-st2-repo .clean-st2-lint-repo .clean-virtualenv .clean-pack
 
 .PHONY: lint
-lint: requirements flake8 pylint configs-check metadata-check
+lint: virtualenv requirements .clone-st2-lint-repo flake8 pylint configs-check metadata-check
 
 .PHONY: flake8
-flake8: requirements .flake8
+flake8: virtualenv requirements .clone-st2-lint-repo .flake8
 
 .PHONY: pylint
-pylint: requirements .clone-st2-repo .pylint
+pylint: virtualenv requirements .clone-st2-repo .clone-st2-lint-repo .pylint
 
 .PHONY: configs-check
-configs-check: requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-check
+configs-check: virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-check
 
 .PHONY: metadata-check
-metadata-check: requirements .metadata-check
+metadata-check: virtualenv requirements .metadata-check
 
 # list all makefile targets
 .PHONY: list
@@ -75,13 +90,13 @@ list:
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: packs-resource-register
-packs-resource-register: requirements .clone-st2-repo .copy-pack-to-subdirectory .install-mongodb .packs-resource-register
+packs-resource-register: virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .install-mongodb .packs-resource-register
 
 .PHONY: packs-missing-tests
-packs-missing-tests: requirements .packs-missing-tests
+packs-missing-tests: virtualenv requirements .packs-missing-tests
 
 .PHONY: packs-tests
-packs-tests: requirements .clone-st2-repo .packs-tests
+packs-tests: virtualenv requirements .clone-st2-repo .packs-tests
 
 .PHONY: test
 test: packs-tests
@@ -109,6 +124,29 @@ test: packs-tests
 	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
+
+.PHONY: .clone-st2-lint-repo
+.clone-st2-lint-repo:
+	@echo
+	@echo "==================== cloning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	if [ ! -d "$(LINT_CONFIGS_DIR)" ]; then \
+		git clone https://github.com/StackStorm/lint-configs.git --depth 1 --single-branch --branch $(LINT_CONFIGS_BRANCH) $(LINT_CONFIGS_DIR); \
+	else \
+		cd "$(LINT_CONFIGS_DIR)"; \
+		git pull; \
+	fi;
+	@echo "End Time = `date --iso-8601=ns`"
+
+.PHONY: .clean-st2-lint-repo
+.clean-st2-lint-repo:
+	@echo
+	@echo "==================== cleaning st2 lint repo ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	rm -rf $(LINT_CONFIGS_DIR)
+	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .configs-check
 .configs-check:
@@ -252,7 +290,7 @@ test: packs-tests
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: requirements
-requirements: virtualenv
+requirements:
 	@echo
 	@echo "==================== requirements ===================="
 	@echo
@@ -264,8 +302,7 @@ requirements: virtualenv
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: virtualenv
-virtualenv: $(VIRTUALENV_DIR)/bin/activate
-$(VIRTUALENV_DIR)/bin/activate:
+virtualenv:
 	@echo
 	@echo "==================== virtualenv ===================="
 	@echo
@@ -274,7 +311,11 @@ $(VIRTUALENV_DIR)/bin/activate:
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
 		else \
-			virtualenv --no-site-packages $(VIRTUALENV_DIR);\
+			if [ "$(PYTHON_EXE)" = "python3" ]; then \
+				$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
+			else \
+				virtualenv --python=$(PYTHON_EXE) --no-site-packages $(VIRTUALENV_DIR);\
+			fi; \
 		fi; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
@@ -287,4 +328,39 @@ $(VIRTUALENV_DIR)/bin/activate:
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	rm -rf $(VIRTUALENV_DIR)
+	rm -rf $(CI_DIR)/python*
 	@echo "End Time = `date --iso-8601=ns`"
+
+
+# setup python2 executable
+.PHONY: .python2
+.python2:
+	@echo
+	@echo "==================== python2 ===================="
+	@echo
+	$(eval PYTHON_EXE=python2)
+	@echo "PYTHON_EXE=$(PYTHON_EXE)"
+
+# setup python3 executable
+.PHONY: .python3
+.python3:
+	@echo
+	@echo "==================== python3 ===================="
+	@echo
+	$(eval PYTHON_EXE=python3)
+	@echo "PYTHON_EXE=$(PYTHON_EXE)"
+
+# initialize PYTHON_EXE dependent variables
+.PHONY: .pythonvars
+.pythonvars:
+	@echo
+	@echo "==================== pythonvars ===================="
+	@echo
+	$(eval PYTHON_VERSION=$(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }'))
+	$(eval PYTHON_NAME=python$(PYTHON_VERSION))
+	$(eval PYTHON_CI_DIR=$(ROOT_DIR)/$(PYTHON_NAME))
+	$(eval VIRTUALENV_DIR=$(PYTHON_CI_DIR)/$(VIRTUALENV_NAME))
+	@echo "PYTHON_VERSION=$(PYTHON_VERSION)"
+	@echo "PYTHON_NAME=$(PYTHON_NAME)"
+	@echo "PYTHON_CI_DIR=$(PYTHON_CI_DIR)"
+	@echo "VIRTUALENV_DIR=$(VIRTUALENV_DIR)"
