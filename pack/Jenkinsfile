@@ -1,0 +1,157 @@
+pipeline {
+    // Sets variables usable for all stages and post actions
+    environment {
+        email_recipients = "developers@encore.tech"
+        git_branch = "${env.BRANCH_NAME}"
+        git_branch_clean = "${git_branch.replace("/", "-")}"
+        job_name = "${env.JOB_NAME}"
+        project_name = "${job_name.split("/")[0]}"
+    }
+    // run on any available agent
+    agent any
+    // We do not neet to checkout(scm) that is done by default
+    stages {
+        stage('Start') {
+            steps {
+                echo "job_name         = ${env.JOB_NAME}"
+                echo "project_name     = ${project_name}"
+                echo "git_branch       = ${git_branch}"
+                echo "git_branch_clean = ${git_branch_clean}"
+                echo "build_number     = ${env.BUILD_NUMBER}"
+
+                // send to chat
+                slackSend(color: 'warning',
+                          message: "STARTED: Job name=[${env.JOB_NAME}] branch=[${git_branch}] build_num=[${env.BUILD_NUMBER}]\n <${env.BUILD_URL}|Link to Build>")
+
+                bitbucketStatusNotify(buildState: 'INPROGRESS')
+            }
+        }
+        stage('Parallel Tests') {
+            parallel {
+                stage('Test Python2') {
+                    // We are using an agent node setup here because if we specify an agent(even if its the same agent) in parallel block
+                    // Jenkins automatically places it in a unique workspace by appending a number(1, 2, etc) to the end of the current workspace
+                    // This solves the issue where vagrant can only bring up one container at a time in the same workspace.
+                    agent {
+                        node {
+                            // Master is the default agent. Otherwise it will look for a agent/node named what ever is passed
+                            // name is required
+                            label 'master'
+
+                            // specify custom workspace because pip doesn't like long directory names
+                            // use the branch name and build number so this directory name is unique
+                            customWorkspace "${env.JENKINS_HOME}/workspace/${project_name}_${git_branch_clean}_${env.BUILD_NUMBER}"
+                        }
+                    }
+                    steps {
+                        echo "python 2 workspace = ${env.WORKSPACE}"
+                        sh "./env.sh make docker-setup"
+                        sh "./env.sh make docker-test"
+                        sh "./env.sh make docker-clean"
+                    }
+                    // Post actions happen at the end of the current stage.
+                    // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
+                    post {
+                        // We want to always clean up the workspaces otherwise it causes random errors
+                        always {
+                            dir("${env.WORKSPACE}") {
+                                deleteDir()
+                            }
+
+                            dir("${env.WORKSPACE}@tmp") {
+                                deleteDir()
+                            }
+                        }
+                        // If any of the steps fail make sure we clean up the docker container
+                        // otherwise files can be locked and workspace cleanups may not work
+                        failure {
+                            sh "./env.sh make docker-clean"
+                        }
+                    }
+                }
+                stage('Test Python3') {
+                    // We are using an agent node setup here because if we specify an agent(even if its the same agent) in parallel block
+                    // Jenkins automatically places it in a unique workspace by appending a number(1, 2, etc) to the end of the current workspace
+                    // This solves the issue where vagrant can only bring up one container at a time in the same workspace.
+                    agent {
+                        node {
+                            // Master is the default agent. Otherwise it will look for a agent/node named what ever is passed
+                            // name is required
+                            label 'master'
+
+                            // specify custom workspace because pip doesn't like long directory names
+                            // use the branch name and build number so this directory name is unique
+                            customWorkspace "${env.JENKINS_HOME}/workspace/${project_name}_${git_branch_clean}_${env.BUILD_NUMBER}"
+                        }
+                    }
+                    steps {
+                        echo "python 3 workspace = ${env.WORKSPACE}"
+                        sh "./env.sh make docker-setup-python-3"
+                        sh "./env.sh make docker-test-python-3"
+                        sh "./env.sh make docker-clean"
+                    }
+                    // Post actions happen at the end of the current stage.
+                    // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
+                    post {
+                        // We want to always clean up the workspaces otherwise it causes random errors
+                        always {
+                            dir("${env.WORKSPACE}") {
+                                deleteDir()
+                            }
+
+                            dir("${env.WORKSPACE}@tmp") {
+                                deleteDir()
+                            }
+                        }
+                        // If any of the steps fail make sure we clean up the docker container
+                        // otherwise files can be locked and workspace cleanups may not work
+                        failure {
+                            sh "./env.sh make docker-clean"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Post actions happen at the end of the current stage.
+    // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
+    post {
+        // We want to always clean up the workspaces otherwise it causes random errors
+        always {
+            deleteDir()
+
+            dir("${env.WORKSPACE}@tmp") {
+                deleteDir()
+            }
+        }
+        // Update slack for success messages
+        success {
+            slackSend(color: 'good',
+                      message: "SUCCESSFUL: Job name=[${env.JOB_NAME}] branch=[${git_branch}] build_num=[${env.BUILD_NUMBER}]\n <${env.BUILD_URL}|Link to Build>")
+
+            bitbucketStatusNotify(buildState: 'SUCCESSFUL')
+        }
+        failure {
+            slackSend(color: 'danger',
+                      message: "FAILED: Job name=[${env.JOB_NAME}] branch=[${git_branch}] build_num=[${env.BUILD_NUMBER}]\n <${env.BUILD_URL}|Link to Build>")
+
+            bitbucketStatusNotify(buildState: 'FAILED')
+
+            // We are using a script block here because the "when" clause is not supported in post
+            // stages so we are using a script block to check if the branch is master and then
+            // send failure emails.
+            script {
+                if (env.BRANCH_NAME == 'master') {
+                    emailext(to: "${email_recipients}",
+                             replyTo: "${email_recipients}",
+                             mimeType: 'text/html',
+                             subject: "Jenkins FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                             body: "<html><body>Jenkins FAILED:<br>" +
+                                   "Job name=[${env.JOB_NAME}] branch=[${git_branch}] build_num=[${env.BUILD_NUMBER}]':<br>" +
+                                   "Check console output at <a href=\"${env.BUILD_URL}\">${env.JOB_NAME} (${git_branch}) [${env.BUILD_NUMBER}]</a></body></html>"
+                    )
+                }
+            }
+        }
+    }
+} // end pipeline
