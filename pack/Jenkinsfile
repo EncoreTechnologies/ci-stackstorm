@@ -1,7 +1,7 @@
 pipeline {
     // Sets variables usable for all stages and post actions
     environment {
-        email_recipients = "developers@encore.tech"
+        email_recipients = ""
         git_branch = "${env.BRANCH_NAME}"
         git_branch_clean = "${git_branch.replace("/", "-")}"
         job_name = "${env.JOB_NAME}"
