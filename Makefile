@@ -318,7 +318,7 @@ virtualenv:
 			if [ "$(PYTHON_EXE)" = "python3" ]; then \
 				$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
 			else \
-				virtualenv --python=$(PYTHON_EXE) --no-site-packages $(VIRTUALENV_DIR);\
+				virtualenv --python=$(PYTHON_EXE) $(VIRTUALENV_DIR);\
 			fi; \
 		fi; \
 	fi;
