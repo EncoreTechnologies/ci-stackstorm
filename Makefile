@@ -250,6 +250,10 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
+	if [ "$(PYTHON_EXE)" = "python2" ]; then \
+		rm -f $(ST2_REPO_PATH)/test-requirements.txt; \
+	  mv $(ST2_REPO_PATH)/test-requirements-py27.txt $(ST2_REPO_PATH)/test-requirements.txt; \
+	fi; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
@@ -302,12 +306,7 @@ requirements:
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip<20.1"; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
-	if [ "$(PYTHON_EXE)" = "python3" ]; then \
-		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/test-requirements.txt; \
-	else \
-		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/test-requirements-py27.txt; \
-	fi; \
+	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: virtualenv
