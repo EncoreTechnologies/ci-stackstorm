@@ -302,7 +302,12 @@ requirements:
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip<20.1"; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
+	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
+	if [ "$(PYTHON_EXE)" = "python3" ]; then \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/test-requirements.txt; \
+	else \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/test-requirements-py27.txt; \
+	fi; \
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: virtualenv
