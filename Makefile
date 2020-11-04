@@ -242,7 +242,10 @@ test: packs-tests
 	ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
-
+# Python 2 has different requirements for tests being that some of the newly updated modules
+# only support python 3. There is a different requirements file to be used for python 2 but
+# this is hardcoded in the bin file. So we can move the file around if using python 2 otherwise
+# use the default module.
 .PHONY: .packs-tests
 .packs-tests:
 	@echo
@@ -250,6 +253,10 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
+	if [ "$(PYTHON_EXE)" = "python" ]; then \
+		rm -f $(ST2_REPO_PATH)/test-requirements.txt; \
+	  mv $(ST2_REPO_PATH)/test-requirements-py27.txt $(ST2_REPO_PATH)/test-requirements.txt; \
+	fi; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
