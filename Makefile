@@ -24,7 +24,7 @@ VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
 
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
-ST2_REPO_BRANCH ?= master
+ST2_REPO_BRANCH ?= v3.3.0
 LINT_CONFIGS_BRANCH ?= master
 LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
