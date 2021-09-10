@@ -318,7 +318,7 @@ virtualenv:
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
 		else \
-			$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
+			python3 -m venv $(VIRTUALENV_DIR); \
 		fi; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
