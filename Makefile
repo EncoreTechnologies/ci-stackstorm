@@ -15,12 +15,12 @@ PY_FILES   := $(shell git ls-files '*.py')
 ROOT_VIRTUALENV ?= ""
 
 ### python 2/3 specific stuff
-PYTHON_EXE ?= python
-PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
-PYTHON_NAME = python$(PYTHON_VERSION)
-PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
-VIRTUALENV_NAME ?= virtualenv
-VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
+# PYTHON_EXE ?= python
+# PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
+# PYTHON_NAME = python$(PYTHON_VERSION)
+# PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
+# VIRTUALENV_NAME ?= virtualenv
+# VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
 
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
@@ -38,13 +38,13 @@ COMPONENTS := $(wildcard /tmp/st2/st2*)
 .PHONY: all
 # don't register right now (requires us to install stackstorm)
 #all: requirements lint packs-resource-register packs-tests
-all: virtualenv requirements lint packs-tests
+all: .pythonvars virtualenv requirements lint packs-tests
 
-.PHONY: python2
-python2: .python2 .pythonvars all
+# .PHONY: python2
+# python2: .python2 .pythonvars all
 
-.PHONY: python3
-python3: .python3 .pythonvars all
+# .PHONY: python3
+# python3: .python3 .pythonvars all
 
 .PHONY: pack-name
 pack-name:
@@ -253,10 +253,6 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	if [ "$(PYTHON_EXE)" = "python" ]; then \
-		rm -f $(ST2_REPO_PATH)/test-requirements.txt; \
-	  mv $(ST2_REPO_PATH)/test-requirements-py27.txt $(ST2_REPO_PATH)/test-requirements.txt; \
-	fi; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
@@ -322,11 +318,7 @@ virtualenv:
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
 		else \
-			if [ "$(PYTHON_EXE)" = "python3" ]; then \
-				$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
-			else \
-				virtualenv --python=$(PYTHON_EXE) $(VIRTUALENV_DIR);\
-			fi; \
+			$(PYTHON_EXE) -m venv $(VIRTUALENV_DIR); \
 		fi; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
@@ -342,24 +334,14 @@ virtualenv:
 	rm -rf $(CI_DIR)/python*
 	@echo "End Time = `date --iso-8601=ns`"
 
-
-# setup python2 executable
-.PHONY: .python2
-.python2:
-	@echo
-	@echo "==================== python2 ===================="
-	@echo
-	$(eval PYTHON_EXE=python2)
-	@echo "PYTHON_EXE=$(PYTHON_EXE)"
-
-# setup python3 executable
-.PHONY: .python3
-.python3:
-	@echo
-	@echo "==================== python3 ===================="
-	@echo
-	$(eval PYTHON_EXE=python3)
-	@echo "PYTHON_EXE=$(PYTHON_EXE)"
+# # setup python3 executable
+# .PHONY: .python3
+# .python3:
+# 	@echo
+# 	@echo "==================== python3 ===================="
+# 	@echo
+# 	$(eval PYTHON_EXE=python3)
+# 	@echo "PYTHON_EXE=$(PYTHON_EXE)"
 
 # initialize PYTHON_EXE dependent variables
 .PHONY: .pythonvars
