@@ -15,12 +15,12 @@ PY_FILES   := $(shell git ls-files '*.py')
 ROOT_VIRTUALENV ?= ""
 
 ### python 2/3 specific stuff
-# PYTHON_EXE ?= python
-# PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
-# PYTHON_NAME = python$(PYTHON_VERSION)
-# PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
-# VIRTUALENV_NAME ?= virtualenv
-# VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
+PYTHON_EXE ?= python
+PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
+PYTHON_NAME = python$(PYTHON_VERSION)
+PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
+VIRTUALENV_NAME ?= virtualenv
+VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
 
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
