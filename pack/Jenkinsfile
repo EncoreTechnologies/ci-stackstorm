@@ -26,89 +26,44 @@ pipeline {
                 bitbucketStatusNotify(buildState: 'INPROGRESS')
             }
         }
-        stage('Parallel Tests') {
-            parallel {
-                stage('Test Python2') {
-                    // We are using an agent node setup here because if we specify an agent(even if its the same agent) in parallel block
-                    // Jenkins automatically places it in a unique workspace by appending a number(1, 2, etc) to the end of the current workspace
-                    // This solves the issue where vagrant can only bring up one container at a time in the same workspace.
-                    agent {
-                        node {
-                            // Master is the default agent. Otherwise it will look for a agent/node named what ever is passed
-                            // name is required
-                            label 'master'
+        stage('Test Python3') {
+            // We are using an agent node setup here because if we specify an agent(even if its the same agent) in parallel block
+            // Jenkins automatically places it in a unique workspace by appending a number(1, 2, etc) to the end of the current workspace
+            // This solves the issue where vagrant can only bring up one container at a time in the same workspace.
+            agent {
+                node {
+                    // Master is the default agent. Otherwise it will look for a agent/node named what ever is passed
+                    // name is required
+                    label 'master'
 
-                            // specify custom workspace because pip doesn't like long directory names
-                            // use the branch name and build number so this directory name is unique
-                            customWorkspace "${env.JENKINS_HOME}/workspace/${project_name}_${git_branch_clean}_${env.BUILD_NUMBER}"
-                        }
+                    // specify custom workspace because pip doesn't like long directory names
+                    // use the branch name and build number so this directory name is unique
+                    customWorkspace "${env.JENKINS_HOME}/workspace/${project_name}_${git_branch_clean}_${env.BUILD_NUMBER}"
+                }
+            }
+            steps {
+                echo "python 3 workspace = ${env.WORKSPACE}"
+                sh "./env.sh make docker-setup"
+                sh "./env.sh make docker-test"
+                sh "./env.sh make docker-clean"
+            }
+            // Post actions happen at the end of the current stage.
+            // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
+            post {
+                // We want to always clean up the workspaces otherwise it causes random errors
+                always {
+                    dir("${env.WORKSPACE}") {
+                        deleteDir()
                     }
-                    steps {
-                        echo "python 2 workspace = ${env.WORKSPACE}"
-                        sh "./env.sh make docker-setup"
-                        sh "./env.sh make docker-test"
-                        sh "./env.sh make docker-clean"
-                    }
-                    // Post actions happen at the end of the current stage.
-                    // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
-                    post {
-                        // We want to always clean up the workspaces otherwise it causes random errors
-                        always {
-                            dir("${env.WORKSPACE}") {
-                                deleteDir()
-                            }
 
-                            dir("${env.WORKSPACE}@tmp") {
-                                deleteDir()
-                            }
-                        }
-                        // If any of the steps fail make sure we clean up the docker container
-                        // otherwise files can be locked and workspace cleanups may not work
-                        failure {
-                            sh "./env.sh make docker-clean"
-                        }
+                    dir("${env.WORKSPACE}@tmp") {
+                        deleteDir()
                     }
                 }
-                stage('Test Python3') {
-                    // We are using an agent node setup here because if we specify an agent(even if its the same agent) in parallel block
-                    // Jenkins automatically places it in a unique workspace by appending a number(1, 2, etc) to the end of the current workspace
-                    // This solves the issue where vagrant can only bring up one container at a time in the same workspace.
-                    agent {
-                        node {
-                            // Master is the default agent. Otherwise it will look for a agent/node named what ever is passed
-                            // name is required
-                            label 'master'
-
-                            // specify custom workspace because pip doesn't like long directory names
-                            // use the branch name and build number so this directory name is unique
-                            customWorkspace "${env.JENKINS_HOME}/workspace/${project_name}_${git_branch_clean}_${env.BUILD_NUMBER}"
-                        }
-                    }
-                    steps {
-                        echo "python 3 workspace = ${env.WORKSPACE}"
-                        sh "./env.sh make docker-setup-python-3"
-                        sh "./env.sh make docker-test-python-3"
-                        sh "./env.sh make docker-clean"
-                    }
-                    // Post actions happen at the end of the current stage.
-                    // There are many options for post actions: https://jenkins.io/doc/book/pipeline/syntax/#post
-                    post {
-                        // We want to always clean up the workspaces otherwise it causes random errors
-                        always {
-                            dir("${env.WORKSPACE}") {
-                                deleteDir()
-                            }
-
-                            dir("${env.WORKSPACE}@tmp") {
-                                deleteDir()
-                            }
-                        }
-                        // If any of the steps fail make sure we clean up the docker container
-                        // otherwise files can be locked and workspace cleanups may not work
-                        failure {
-                            sh "./env.sh make docker-clean"
-                        }
-                    }
+                // If any of the steps fail make sure we clean up the docker container
+                // otherwise files can be locked and workspace cleanups may not work
+                failure {
+                    sh "./env.sh make docker-clean"
                 }
             }
         }

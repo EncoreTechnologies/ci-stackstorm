@@ -3,8 +3,7 @@ ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 CI_REPO_PATH ?= $(ROOT_DIR)/ci
 CI_REPO_BRANCH ?= master
 DOCKER_REGISTRY ?= ""
-DOCKER_IMAGE ?= centos7-stackstorm
-DOCKER_IMAGE_PYTHON_3 ?= centos7-stackstorm-python-3
+DOCKER_IMAGE ?= centos7-stackstorm-python-3
 DOCKERFILE_PATH ?= $(ROOT_DIR)
 DOCKERFILE ?= Dockerfile
 VAGRANT_NAME ?= python2
@@ -34,14 +33,6 @@ docker-setup: .docker-setup
 # execute unit tests
 .PHONY: docker-test
 docker-test: .docker-test
-
-# setup docker container
-.PHONY: docker-setup-python-3
-docker-setup-python-3: .docker-setup-python-3
-
-# execute unit tests
-.PHONY: docker-test-python-3
-docker-test-python-3: .docker-test-python-3
 
 # cleans up our old docker containers from previous runs
 .PHONY: docker-clean
@@ -100,21 +91,7 @@ list:
 	@echo
 	@echo "==================== docker-test ===================="
 	@echo
-	vagrant docker-exec -t -- bash -c 'make python2'
-
-.PHONY: .docker-setup-python-3
-.docker-setup-python-3:
-	@echo
-	@echo "==================== docker-setup-python-3 ===================="
-	@echo
-	DOCKER_REGISTRY=$(DOCKER_REGISTRY) DOCKER_IMAGE=$(DOCKER_IMAGE_PYTHON_3) vagrant up
-
-.PHONY: .docker-test-python-3
-.docker-test-python-3: .docker-test-python-3
-	@echo
-	@echo "==================== docker-test-python-3 ===================="
-	@echo
-	vagrant docker-exec -t -- bash -c 'make python3'
+	vagrant docker-exec -t -- bash -c 'make all'
 
 .PHONY: .docker-clean
 .docker-clean:
