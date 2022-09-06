@@ -253,7 +253,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -x -p $(PACK_DIR) || exit 1;
+	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .packs-missing-tests
