@@ -109,7 +109,7 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
-		flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
+		$(VIRTUALENV_DIR)/bin/flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
 	done
 	@echo "End Time = `date --iso-8601=ns`"
 
