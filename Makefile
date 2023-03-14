@@ -109,7 +109,7 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
-		$(VIRTUALENV_DIR)/bin/flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
+		flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
 	done
 	@echo "End Time = `date --iso-8601=ns`"
 
@@ -121,7 +121,7 @@ test: packs-tests
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} $(VIRTUALENV_DIR)/bin/st2-check-pylint-pack $(PACK_DIR) || exit 1;
+	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 
