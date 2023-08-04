@@ -318,7 +318,7 @@ virtualenv:
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
 		else \
-			if python3.9 --version >/dev/null 2>&1; then \
+			if python3.8 --version >/dev/null 2>&1; then \
 			    python3.8 -m venv $(VIRTUALENV_DIR); \
 			else \
 			    python3 -m venv $(VIRTUALENV_DIR); \
