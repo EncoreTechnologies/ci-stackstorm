@@ -303,7 +303,7 @@ requirements:
 #       attribute that was removed in pip==20.1 (TODO: remove when fix is pushed everywhere)
 #       Reference: https://github.com/StackStorm/st2/pull/4750
 	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip<20.1"; \
+	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
 	@echo "End Time = `date --iso-8601=ns`"
