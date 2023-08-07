@@ -51,22 +51,22 @@ pack-name:
 	@echo $(PACK_NAME)
 
 .PHONY: clean
-clean: .clean-st2-repo .clean-st2-lint-repo .clean-virtualenv .clean-pack
+clean: .pythonvars .clean-st2-repo .clean-st2-lint-repo .clean-virtualenv .clean-pack
 
 .PHONY: lint
-lint: virtualenv requirements .clone-st2-lint-repo flake8 pylint configs-check metadata-check
+lint: .pythonvars virtualenv requirements .clone-st2-lint-repo flake8 pylint configs-check metadata-check
 
 .PHONY: flake8
-flake8: virtualenv requirements .clone-st2-lint-repo .flake8
+flake8: .pythonvars virtualenv requirements .clone-st2-lint-repo .flake8
 
 .PHONY: pylint
-pylint: virtualenv requirements .clone-st2-repo .clone-st2-lint-repo .pylint
+pylint: .pythonvars virtualenv requirements .clone-st2-repo .clone-st2-lint-repo .pylint
 
 .PHONY: configs-check
-configs-check: virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-check
+configs-check: .pythonvars virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .configs-check
 
 .PHONY: metadata-check
-metadata-check: virtualenv requirements .metadata-check
+metadata-check: .pythonvars virtualenv requirements .metadata-check
 
 # list all makefile targets
 .PHONY: list
@@ -90,13 +90,13 @@ list:
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: packs-resource-register
-packs-resource-register: virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .install-mongodb .packs-resource-register
+packs-resource-register: .pythonvars virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .install-mongodb .packs-resource-register
 
 .PHONY: packs-missing-tests
-packs-missing-tests: virtualenv requirements .packs-missing-tests
+packs-missing-tests: .pythonvars virtualenv requirements .packs-missing-tests
 
 .PHONY: packs-tests
-packs-tests: virtualenv requirements .clone-st2-repo .packs-tests
+packs-tests: .pythonvars virtualenv requirements .clone-st2-repo .packs-tests
 
 .PHONY: test
 test: packs-tests
@@ -298,14 +298,13 @@ requirements:
 	@echo "==================== requirements ===================="
 	@echo
 	@echo "Start Time = `date --iso-8601=ns`"
-# NOTE: pinning pip to <20.1 because new version (20.1) breaks the dist_utils.py
-#       that is included in most of StackStorm's code. We rely on a ParsedRequirements.link
-#       attribute that was removed in pip==20.1 (TODO: remove when fix is pushed everywhere)
-#       Reference: https://github.com/StackStorm/st2/pull/4750
-	. $(VIRTUALENV_DIR)/bin/activate; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt;
+	if [ ! -f "$(CI_DIR)/requirements-installed.txt" ]; then \
+		. $(VIRTUALENV_DIR)/bin/activate; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
+		touch $(CI_DIR)/requirements-installed.txt; \
+	fi;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: virtualenv
