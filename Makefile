@@ -15,7 +15,9 @@ PY_FILES   := $(shell git ls-files '*.py')
 ROOT_VIRTUALENV ?= ""
 
 ### python 2/3 specific stuff
-PYTHON_EXE ?= python3
+
+#PYTHON_EXE ?= python3
+PYTHON_EXE ?= $(shell if python3.8 --version >/dev/null 2>&1; then echo "python3.8"; else echo "python3"; fi)
 PYTHON_VERSION = $(shell $(PYTHON_EXE) --version 2>&1 | awk '{ print $$2 }')
 PYTHON_NAME = python$(PYTHON_VERSION)
 PYTHON_CI_DIR = $(ROOT_DIR)/$(PYTHON_NAME)
@@ -255,9 +257,11 @@ test: packs-tests
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	if [ ! -f "$(CI_DIR)/st2-requirements-installed.txt" ]; then \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/requirements.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements-tests.txt; \
 		touch $(CI_DIR)/st2-requirements-installed.txt; \
 	fi; \
-	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -v -p $(PACK_DIR) || exit 1;
+	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .packs-missing-tests
@@ -307,8 +311,6 @@ requirements:
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
-		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements.txt; \
-		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements-tests.txt; \
 		touch $(CI_DIR)/requirements-installed.txt; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
