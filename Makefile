@@ -254,8 +254,6 @@ test: packs-tests
 	@echo "Start Time = `date --iso-8601=ns`"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/requirements.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)/requirements.txt; \
-	$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)/requirements-tests.txt; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -p $(PACK_DIR) || exit 1;
 	@echo "End Time = `date --iso-8601=ns`"
 
@@ -306,6 +304,8 @@ requirements:
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-dev.txt; \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)/requirements.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)/requirements-tests.txt; \
 		touch $(CI_DIR)/requirements-installed.txt; \
 	fi;
 	@echo "End Time = `date --iso-8601=ns`"
