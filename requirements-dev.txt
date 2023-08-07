@@ -1,10 +1,10 @@
 # Needed for check and lint scripts
 -e git+https://github.com/EncoreTechnologies/st2sdk.git@feature/requirement_updates#egg=st2sdk
-pyyaml
 six==1.13.0
-pep8==1.7.1
-flake8==4.0.1
-astroid==2.5.6
-pylint==2.8.2
-# fix isort dependency of pylint 1.9.4 by keeping it below its 5.x version
-isort>=4.2.5
+#flake8==4.0.1
+pyyaml
+pep8
+flake8==3.7.7
+astroid
+pylint
+isort
