@@ -250,24 +250,24 @@ test: packs-tests
 # use the default module.
 .PHONY: .packs-tests
 .packs-tests:
-    @echo
-    @echo "==================== packs-tests ===================="
-    @echo
-    @echo "Start Time = `date --iso-8601=ns`"
-    $(eval PYTHON_MAJOR_MINOR_VERSION=$(shell $(PYTHON_EXE) -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'))
-    @if [ $(PYTHON_MAJOR_MINOR_VERSION) \> 3.11 ]; then \
-        echo "Error: Python version must be less than 3.12. Current version is $(PYTHON_MAJOR_MINOR_VERSION)."; \
-        exit 1; \
-    fi
-    . $(VIRTUALENV_DIR)/bin/activate; \
-    if [ ! -f "$(CI_DIR)/st2-requirements-installed.txt" ]; then \
-        $(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/requirements.txt; \
-        $(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements.txt; \
-        $(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements-tests.txt; \
-        touch $(CI_DIR)/st2-requirements-installed.txt; \
-    fi; \
-    ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -p $(PACK_DIR) || exit 1;
-    @echo "End Time = `date --iso-8601=ns`"
+	@echo
+	@echo "==================== packs-tests ===================="
+	@echo
+	@echo "Start Time = `date --iso-8601=ns`"
+	$(eval PYTHON_MAJOR_MINOR_VERSION=$(shell $(PYTHON_EXE) -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'))
+	@if [ $(PYTHON_MAJOR_MINOR_VERSION) \> 3.11 ]; then \
+		echo "Error: Python version must be less than 3.12. Current version is $(PYTHON_MAJOR_MINOR_VERSION)."; \
+		exit 1; \
+	fi
+	. $(VIRTUALENV_DIR)/bin/activate; \
+	if [ ! -f "$(CI_DIR)/st2-requirements-installed.txt" ]; then \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/requirements.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements.txt; \
+		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(PACK_DIR)requirements-tests.txt; \
+		touch $(CI_DIR)/st2-requirements-installed.txt; \
+	fi; \
+	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -p $(PACK_DIR) || exit 1;
+	@echo "End Time = `date --iso-8601=ns`"
 
 .PHONY: .packs-missing-tests
 .packs-missing-tests:
