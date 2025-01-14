@@ -1,5 +1,5 @@
 # Needed for check and lint scripts
--e git+https://github.com/EncoreTechnologies/st2sdk.git@feature/updated_requirements#egg=st2sdk
+-e git+https://github.com/EncoreTechnologies/st2sdk.git#egg=st2sdk
 #flake8==4.0.1
 pyyaml
 pep8
