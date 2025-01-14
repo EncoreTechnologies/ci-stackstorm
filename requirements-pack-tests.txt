@@ -1,2 +1,3 @@
 mock
 pytest==7.0.1
+pytest-cov
