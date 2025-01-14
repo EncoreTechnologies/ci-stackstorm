@@ -84,8 +84,8 @@ list:
 
 .PHONY: .copy-pack-to-subdirectory
 .copy-pack-to-subdirectory:
-    mkdir -p /tmp/packs/$(PACK_NAME)
-    cd $(PACK_DIR); find . -name 'ci' -prune -or -name '.git' -or -type f -print | rsync -R --files-from=- ./ /tmp/packs/$(PACK_NAME)
+	mkdir -p /tmp/packs/$(PACK_NAME)
+	cd $(PACK_DIR); find . -name 'ci' -prune -or -name '.git' -or -type f -print | rsync -R --files-from=- ./ /tmp/packs/$(PACK_NAME)
 
 .PHONY: .clean-pack
 .clean-pack:
