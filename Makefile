@@ -77,7 +77,6 @@ list:
 
 # Task which copies pack to temporary sub-directory so we can use old-style check scripts which
 # # require pack to be in a sub-directory
-
 .PHONY: .copy-pack-to-subdirectory
 .copy-pack-to-subdirectory:
 	mkdir -p /tmp/packs/$(PACK_NAME)
