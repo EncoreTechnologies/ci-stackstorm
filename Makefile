@@ -80,16 +80,16 @@ list:
 .PHONY: .copy-pack-to-subdirectory
 .copy-pack-to-subdirectory:
 	mkdir -p /tmp/packs/$(PACK_NAME)
-	cd $(PACK_DIR);	find . -name 'ci' -prune -or -name '.git' -or -type f -exec cp --parents '{}' '/tmp/packs/$(PACK_NAME)' ';'
+	cd $(PACK_DIR); find . -name 'ci' -prune -or -name '.git' -or -type f -print | rsync -R --files-from=- ./ /tmp/packs/$(PACK_NAME)
 
 .PHONY: .clean-pack
 .clean-pack:
 	@echo
 	@echo "==================== cleaning packs ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	rm -rf /tmp/packs/${PACK_DIR}
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: packs-resource-register
 packs-resource-register: .pythonvars virtualenv requirements .clone-st2-repo .copy-pack-to-subdirectory .install-mongodb .packs-resource-register
@@ -108,12 +108,12 @@ test: packs-tests
 	@echo
 	@echo "==================== flake8 ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for py in $(PY_FILES); do \
 		flake8 --config $(LINT_CONFIGS_DIR)/python/.flake8 $$py || exit 1; \
 	done
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 
 .PHONY: .pylint
@@ -121,10 +121,10 @@ test: packs-tests
 	@echo
 	@echo "==================== pylint ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	REQUIREMENTS_DIR=$(CI_DIR)/ CONFIG_DIR=$(LINT_CONFIGS_DIR) ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-pylint-pack $(PACK_DIR) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 
 .PHONY: .clone-st2-lint-repo
@@ -132,30 +132,30 @@ test: packs-tests
 	@echo
 	@echo "==================== cloning st2 lint repo ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	if [ ! -d "$(LINT_CONFIGS_DIR)" ]; then \
 		git clone https://github.com/StackStorm/lint-configs.git --depth 1 --single-branch --branch $(LINT_CONFIGS_BRANCH) $(LINT_CONFIGS_DIR); \
 	else \
 		cd "$(LINT_CONFIGS_DIR)"; \
 		git pull; \
 	fi;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .clean-st2-lint-repo
 .clean-st2-lint-repo:
 	@echo
 	@echo "==================== cleaning st2 lint repo ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	rm -rf $(LINT_CONFIGS_DIR)
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .configs-check
 .configs-check:
 	@echo
 	@echo "==================== configs-check ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	for yaml in $(YAML_FILES); do \
 		st2-check-validate-yaml-file $$yaml || exit 1; \
@@ -164,24 +164,24 @@ test: packs-tests
 	for json in $(JSON_FILES); do \
 		st2-check-validate-json-file $$json || exit 1; \
 	done
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	@echo
 	@echo "==================== example config check ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-validate-pack-example-config /tmp/packs/$(PACK_NAME) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .metadata-check
 .metadata-check:
 	@echo
 	@echo "==================== metadata-check ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-validate-pack-metadata-exists $(PACK_DIR) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .install-mongodb
 .install-monogodb:
@@ -239,10 +239,10 @@ test: packs-tests
 	@echo
 	@echo "==================== packs-resource-register ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	ST2_CONFIG_FILE=$(CI_DIR)/st2.tests.conf ST2_REPO_PATH=${ST2_REPO_PATH} st2-check-register-pack-resources /tmp/packs/$(PACK_NAME) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 # Python 2 has different requirements for tests being that some of the newly updated modules
 # only support python 3. There is a different requirements file to be used for python 2 but
@@ -253,7 +253,7 @@ test: packs-tests
 	@echo
 	@echo "==================== packs-tests ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	if [ ! -f "$(CI_DIR)/st2-requirements-installed.txt" ]; then \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(ST2_REPO_PATH)/requirements.txt; \
@@ -262,24 +262,24 @@ test: packs-tests
 		touch $(CI_DIR)/st2-requirements-installed.txt; \
 	fi; \
 	ST2_REPO_PATH=${ST2_REPO_PATH} $(ST2_REPO_PATH)/st2common/bin/st2-run-pack-tests -c -t -x -j -p $(PACK_DIR) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .packs-missing-tests
 .packs-missing-tests:
 	@echo
 	@echo "==================== pack-missing-tests ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	. $(VIRTUALENV_DIR)/bin/activate; \
 	st2-check-print-pack-tests-coverage $(PACK_DIR) || exit 1;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .clone-st2-repo
 .clone-st2-repo:
 	@echo
 	@echo "==================== cloning st2 repo ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	if [ -d "/tmp/st2" ]; then \
 		cp -r "/tmp/st2" "$(ST2_REPO_PATH)"; \
 	fi; \
@@ -289,23 +289,23 @@ test: packs-tests
 		cd "$(ST2_REPO_PATH)"; \
 		git pull; \
 	fi;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: .clean-st2-repo
 .clean-st2-repo:
 	@echo
 	@echo "==================== cleaning st2 repo ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	rm -rf $(ST2_REPO_PATH)
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: requirements
 requirements:
 	@echo
 	@echo "==================== requirements ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	if [ ! -f "$(CI_DIR)/requirements-installed.txt" ]; then \
 		. $(VIRTUALENV_DIR)/bin/activate; \
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache --upgrade "pip"; \
@@ -313,14 +313,14 @@ requirements:
 		$(VIRTUALENV_DIR)/bin/pip install --cache-dir $(HOME)/.pip-cache -q -r $(CI_DIR)/requirements-pack-tests.txt; \
 		touch $(CI_DIR)/requirements-installed.txt; \
 	fi;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 .PHONY: virtualenv
 virtualenv:
 	@echo
 	@echo "==================== virtualenv ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	if [ ! -d "$(VIRTUALENV_DIR)" ]; then \
 		if [ -d "$(ROOT_VIRTUALENV)" ]; then \
 			$(ROOT_DIR)/bin/clonevirtualenv.py $(ROOT_VIRTUALENV) $(VIRTUALENV_DIR);\
@@ -332,7 +332,7 @@ virtualenv:
 			fi; \
 		fi; \
 	fi;
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 
 .PHONY: .clean-virtualenv
@@ -340,10 +340,10 @@ virtualenv:
 	@echo
 	@echo "==================== cleaning virtualenv ===================="
 	@echo
-	@echo "Start Time = `date --iso-8601=ns`"
+	@echo "Start Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 	rm -rf $(VIRTUALENV_DIR)
 	rm -rf $(CI_DIR)/python*
-	@echo "End Time = `date --iso-8601=ns`"
+	@echo "End Time = $(shell date '+%Y-%m-%dT%H:%M:%S.%N')"
 
 # # setup python3 executable
 # .PHONY: .python3

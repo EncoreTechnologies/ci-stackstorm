@@ -1,10 +1,9 @@
 # Needed for check and lint scripts
--e git+https://github.com/EncoreTechnologies/st2sdk.git@feature/requirement_updates#egg=st2sdk
-six==1.13.0
+-e git+https://github.com/EncoreTechnologies/st2sdk.git#egg=st2sdk
 #flake8==4.0.1
 pyyaml
 pep8
 flake8==3.7.7
 astroid
-pylint
+pylint==3.1.1
 isort
