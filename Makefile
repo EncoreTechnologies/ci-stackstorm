@@ -26,7 +26,7 @@ VIRTUALENV_DIR ?= $(PYTHON_CI_DIR)/$(VIRTUALENV_NAME)
 
 ST2_VIRTUALENV_DIR ?= "/tmp/st2-pack-tests-virtualenvs"
 ST2_REPO_PATH ?= $(CI_DIR)/st2
-ST2_REPO_BRANCH ?= master
+ST2_REPO_BRANCH ?= feature/test-coverage-report
 LINT_CONFIGS_BRANCH ?= master
 LINT_CONFIGS_DIR ?= $(CI_DIR)/lint-configs/
 
@@ -284,7 +284,7 @@ test: packs-tests
 		cp -r "/tmp/st2" "$(ST2_REPO_PATH)"; \
 	fi; \
 	if [ ! -d "$(ST2_REPO_PATH)" ]; then \
-		git clone https://github.com/StackStorm/st2.git --depth 1 --single-branch --branch $(ST2_REPO_BRANCH) $(ST2_REPO_PATH); \
+		git clone https://github.com/EncoreTechnologies/st2.git --depth 1 --single-branch --branch $(ST2_REPO_BRANCH) $(ST2_REPO_PATH); \
 	else \
 		cd "$(ST2_REPO_PATH)"; \
 		git pull; \
